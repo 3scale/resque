@@ -1,7 +1,11 @@
-begin
-  require 'airbrake'
-rescue LoadError
-  raise "Can't find 'airbrake' gem. Please add it to your Gemfile or install it."
+if !defined? ::Airbrake
+  begin
+    require 'airbrake'
+  rescue LoadError
+    raise LoadError, "Can't find 'airbrake' gem. Please add it to your " \
+      "Gemfile and install it or define an Airbrake top-level constant " \
+      "implementing the Airbrake interface."
+  end
 end
 
 module Resque
@@ -21,12 +25,23 @@ module Resque
       end
 
       def save
-        ::Airbrake.notify(exception,
-            :parameters => {
-            :payload_class => payload['class'].to_s,
-            :payload_args => payload['args'].inspect
-            }
-          )
+        notify(exception,
+          :parameters => {
+          :payload_class => payload['class'].to_s,
+          :payload_args => payload['args'].inspect
+          }
+        )
+      end
+
+      private
+
+      def notify(exception, options)
+        if ::Airbrake.respond_to?(:notify_sync)
+          ::Airbrake.notify_sync(exception, options)
+        else
+          # Older versions of Airbrake (< 5)
+          ::Airbrake.notify(exception, options)
+        end
       end
     end
   end

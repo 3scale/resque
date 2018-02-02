@@ -2,6 +2,13 @@
 
 Nothing yet!
 
+## 1.27.4-3scale (2017-02-02)
+
+### Changed
+* Do not require the Airbrake gem unconditionally anymore when using the
+  Resque::Failure::Airbrake module. A top-level Airbrake constant implementing
+  the same interface will be used if present.
+
 ## 1.27.4 (2017-4-15)
 
 ### Fixed
